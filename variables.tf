@@ -1,36 +1,71 @@
 variable "private_key_algorithm" {
-  type    = string
-  default = "ECDSA"
+  description = "Algorithm to be used for private key encryption"
+  type        = string
+  default     = "RSA"
 }
 
 variable "private_key_ecdsa_curve" {
-  type    = string
-  default = "P256"
+  description = "If the algorithm is ECDSA then we need to provide curve, otherwise is ignored"
+  type        = string
+  default     = "P256"
 }
 
 variable "private_key_rsa_bits" {
-  type    = string
-  default = "2048"
+  description = "If the algorithm is RSA then we need to provide bits, otherwise is ignored"
+  type        = string
+  default     = "2048"
 }
 
-variable "ca_cert" {
-  type = string
+variable "root_ca_cert" {
+  description = "Root CA cert to be used for Intermediate CA creation"
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = can(regex("^-----BEGIN CERTIFICATE-----", var.root_ca_cert))
+    error_message = "Invalid root CA certificate format. It should be in PEM format."
+  }
 }
 
-variable "ca_key" {
-  type = string
-}
+variable "root_ca_key" {
+  description = "Root CA key to be used for Intermediate CA creation"
+  type        = string
+  default     = ""
 
-variable "ca_key_algorithm" {
-  type = string
+  validation {
+    condition     = can(regex("^-----BEGIN RSA PRIVATE KEY-----", var.root_ca_key))
+    error_message = "Invalid root CA key format. It should be in PEM format."
+  }
 }
 
 variable "organization_name" {
-  type = string
+  description = "Distinguished name: O"
+  type        = string
+}
+
+variable "country" {
+  description = "Distinguished name: C"
+  type        = string
+}
+
+variable "locality" {
+  description = "Distinguished name: L"
+  type        = string
+}
+
+variable "organizational_unit" {
+  description = "Distinguished name: OU"
+  type        = string
+}
+
+variable "province" {
+  description = "Distinguished name: ST"
+  type        = string
 }
 
 variable "common_name" {
-  type = string
+  description = "Distinguished name: CN"
+  type        = string
 }
 
 variable "uris" {
@@ -40,17 +75,23 @@ variable "uris" {
 }
 
 variable "validity_period_hours" {
-  description = "Default validity is 87660 hours which is 10 year"
+  description = "Validity period to be used for Intermediate CA in hours"
   type        = string
   default     = 87660
 }
 
 variable "allowed_uses" {
-  type = list(string)
+  description = "Allowed uses for the Intermediate CA"
+  type        = list(string)
 
   default = [
-    "cert_signing",
-    "key_encipherment",
     "digital_signature",
+    "cert_signing",
+    "crl_signing",
   ]
+}
+
+variable "certificate_chain" {
+  description = "Path to be used for storing certificate chain"
+  type        = string
 }
